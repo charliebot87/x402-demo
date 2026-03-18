@@ -1,4 +1,4 @@
-const RECIPIENT = "charliebot"
+const RECIPIENT = "paul"
 const AMOUNT = "0.0001 XPR"
 const HYPERION = "https://proton.eosusa.io"
 
@@ -25,7 +25,7 @@ export default async function handler(req: any, res: any) {
         action: "eosio.token::transfer",
         data: {
           from: "<your_account>",
-          to: RECIPIENT,
+          to: "paul",
           quantity: AMOUNT,
           memo: "x402-premium"
         },
