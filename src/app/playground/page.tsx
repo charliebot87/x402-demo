@@ -6,9 +6,45 @@ import Link from 'next/link'
 import { ENDPOINTS, RECIPIENT, EXPLORER, type Endpoint } from '@/lib/constants'
 
 type LogEntry = {
-  type: 'request' | 'response' | 'info' | 'error' | 'success' | 'payment'
+  type: 'request' | 'response' | 'info' | 'error' | 'success' | 'payment' | 'header'
   text: string
   timestamp: string
+}
+
+/**
+ * Base64url encode (browser-safe, no padding)
+ */
+function base64urlEncode(str: string): string {
+  const bytes = new TextEncoder().encode(str)
+  let binary = ''
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+/**
+ * Build a spec-compliant Authorization: Payment credential
+ */
+function buildPaymentCredential(challenge: any, txHash: string): string {
+  const credential = {
+    challenge,
+    payload: { txHash },
+  }
+  return `Payment ${base64urlEncode(JSON.stringify(credential))}`
+}
+
+/**
+ * Parse a WWW-Authenticate: Payment header to extract the challenge
+ */
+function parseWwwAuthenticate(response: Response): any | null {
+  const header = response.headers.get('www-authenticate')
+  if (!header || !header.startsWith('Payment ')) return null
+  try {
+    const b64 = header.slice('Payment '.length)
+    const decoded = atob(b64.replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(decoded)
+  } catch {
+    return null
+  }
 }
 
 function PlaygroundContent() {
@@ -21,7 +57,7 @@ function PlaygroundContent() {
   const [loading, setLoading] = useState(false)
   const [walletSession, setWalletSession] = useState<any>(null)
   const [walletAccount, setWalletAccount] = useState<string | null>(null)
-  const [challengeId, setChallengeId] = useState<string | null>(null)
+  const [challenge, setChallenge] = useState<any>(null)
   const [challengeAmount, setChallengeAmount] = useState<string | null>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
 
@@ -72,13 +108,36 @@ function PlaygroundContent() {
 
     try {
       const resp = await fetch(selectedEndpoint.path)
-      const data = await resp.json()
 
       if (resp.status === 402) {
         addLog('response', `← 402 Payment Required`)
-        addLog('info', formatJson(data))
-        setChallengeId(data.payment.memo)
-        setChallengeAmount(data.payment.amount.replace(' XPR', ''))
+
+        // Show spec-compliant headers
+        const wwwAuth = resp.headers.get('www-authenticate')
+        if (wwwAuth) {
+          addLog('header', `WWW-Authenticate: ${wwwAuth.substring(0, 80)}...`)
+        }
+
+        // Parse the challenge from the WWW-Authenticate header
+        const parsedChallenge = parseWwwAuthenticate(resp)
+
+        // Also show the body for context
+        const data = await resp.json().catch(() => null)
+
+        if (parsedChallenge) {
+          setChallenge(parsedChallenge)
+          const amount = parsedChallenge.request?.amount || selectedEndpoint.price + ' XPR'
+          setChallengeAmount(amount.replace(' XPR', ''))
+          addLog('info', `Challenge ID: ${parsedChallenge.id}`)
+          addLog('info', `Method: ${parsedChallenge.method}/${parsedChallenge.intent}`)
+          addLog('info', `Amount: ${amount}`)
+          addLog('info', `Recipient: ${parsedChallenge.request?.recipient || RECIPIENT}`)
+          if (parsedChallenge.expires) {
+            addLog('info', `Expires: ${parsedChallenge.expires}`)
+          }
+        } else if (data) {
+          addLog('info', formatJson(data))
+        }
 
         if (!walletAccount) {
           addLog('info', '⚠ Connect your wallet to pay and unlock this endpoint')
@@ -87,6 +146,7 @@ function PlaygroundContent() {
         }
       } else {
         addLog('response', `← ${resp.status}`)
+        const data = await resp.json()
         addLog('info', formatJson(data))
       }
     } catch (e: any) {
@@ -97,12 +157,13 @@ function PlaygroundContent() {
 
   // Step 2: Pay via WebAuth
   const sendPayment = async () => {
-    if (!walletSession || !challengeId || !challengeAmount) return
+    if (!walletSession || !challenge || !challengeAmount) return
     setLoading(true)
 
     const account = walletSession.auth.actor.toString()
+    const memo = challenge.id
     addLog('payment', `Sending ${challengeAmount} XPR to ${RECIPIENT}...`)
-    addLog('info', `memo: ${challengeId}`)
+    addLog('info', `memo: ${memo}`)
 
     try {
       const result = await walletSession.transact(
@@ -116,7 +177,7 @@ function PlaygroundContent() {
                 from: account,
                 to: RECIPIENT,
                 quantity: `${challengeAmount} XPR`,
-                memo: challengeId,
+                memo,
               },
             },
           ],
@@ -135,45 +196,61 @@ function PlaygroundContent() {
       addLog('info', `tx: ${txId}`)
       addLog('info', `${EXPLORER}/transaction/${txId}`)
 
-      // Step 3: Retry with payment proof
-      addLog('request', `GET ${selectedEndpoint.path} + payment headers`)
-      addLog('info', `X-Payment-Tx: ${txId}`)
-      addLog('info', `X-Payment-Memo: ${challengeId}`)
+      // Step 3: Build spec-compliant credential and retry
+      const authHeader = buildPaymentCredential(challenge, txId)
+      addLog('request', `GET ${selectedEndpoint.path}`)
+      addLog('header', `Authorization: Payment <credential>`)
 
       // Small delay for Hyperion indexing
       await new Promise((r) => setTimeout(r, 1500))
 
-      const resp = await fetch(
-        `${selectedEndpoint.path}?tx=${txId}&memo=${challengeId}`
-      )
-      const data = await resp.json()
+      const resp = await fetch(selectedEndpoint.path, {
+        headers: {
+          'Authorization': authHeader,
+        },
+      })
 
       if (resp.status === 200) {
+        // Show the Payment-Receipt header
+        const receiptHeader = resp.headers.get('payment-receipt')
+        if (receiptHeader) {
+          addLog('header', `Payment-Receipt: ${receiptHeader.substring(0, 60)}...`)
+        }
+
+        const data = await resp.json()
         addLog('success', `← 200 OK — Content unlocked! 🎉`)
         addLog('info', formatJson(data))
       } else {
+        const data = await resp.json().catch(() => ({}))
         addLog('error', `← ${resp.status}`)
         addLog('info', formatJson(data))
 
-        // Retry once more after another delay
-        if (data.error?.includes('not found') || data.error?.includes('not executed')) {
+        // Retry once more after delay (Hyperion indexing)
+        if (resp.status === 402) {
           addLog('info', 'Waiting for Hyperion to index the transaction...')
           await new Promise((r) => setTimeout(r, 3000))
-          const resp2 = await fetch(
-            `${selectedEndpoint.path}?tx=${txId}&memo=${challengeId}`
-          )
-          const data2 = await resp2.json()
+          const resp2 = await fetch(selectedEndpoint.path, {
+            headers: {
+              'Authorization': authHeader,
+            },
+          })
           if (resp2.status === 200) {
+            const receiptHeader = resp2.headers.get('payment-receipt')
+            if (receiptHeader) {
+              addLog('header', `Payment-Receipt: ${receiptHeader.substring(0, 60)}...`)
+            }
+            const data2 = await resp2.json()
             addLog('success', `← 200 OK — Content unlocked! 🎉`)
             addLog('info', formatJson(data2))
           } else {
+            const data2 = await resp2.json().catch(() => ({}))
             addLog('error', `← ${resp2.status} (retry)`)
             addLog('info', formatJson(data2))
           }
         }
       }
 
-      setChallengeId(null)
+      setChallenge(null)
       setChallengeAmount(null)
     } catch (e: any) {
       addLog('error', `Payment failed: ${e.message}`)
@@ -183,7 +260,7 @@ function PlaygroundContent() {
 
   const clearLogs = () => {
     setLogs([])
-    setChallengeId(null)
+    setChallenge(null)
     setChallengeAmount(null)
   }
 
@@ -215,6 +292,17 @@ function PlaygroundContent() {
           )}
         </div>
 
+        {/* Spec badge */}
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-terminal-card/50 border border-terminal-border text-xs text-gray-400">
+            <span className="text-terminal-green">●</span>
+            Spec-compliant: WWW-Authenticate / Authorization / Payment-Receipt headers
+            <a href="https://paymentauth.org" target="_blank" className="text-terminal-cyan hover:underline ml-1">
+              IETF Draft
+            </a>
+          </div>
+        </div>
+
         {/* Main layout */}
         <div className="grid lg:grid-cols-5 gap-6">
           {/* Left panel: endpoint selector */}
@@ -227,7 +315,7 @@ function PlaygroundContent() {
                 key={ep.path}
                 onClick={() => {
                   setSelectedEndpoint(ep)
-                  setChallengeId(null)
+                  setChallenge(null)
                   setChallengeAmount(null)
                 }}
                 className={`w-full text-left p-4 rounded-xl border transition-all ${
@@ -256,7 +344,7 @@ function PlaygroundContent() {
               >
                 {loading ? 'Loading...' : `GET ${selectedEndpoint.path}`}
               </button>
-              {challengeId && walletAccount && (
+              {challenge && walletAccount && (
                 <button
                   onClick={sendPayment}
                   disabled={loading}
@@ -265,7 +353,7 @@ function PlaygroundContent() {
                   {loading ? 'Processing...' : `Pay ${challengeAmount} XPR with WebAuth`}
                 </button>
               )}
-              {challengeId && !walletAccount && (
+              {challenge && !walletAccount && (
                 <button
                   onClick={connectWallet}
                   className="w-full px-4 py-3 bg-terminal-green/20 border border-terminal-green/30 text-terminal-green font-bold rounded-lg hover:bg-terminal-green/30 transition-all text-sm"
@@ -293,9 +381,9 @@ function PlaygroundContent() {
               {logs.length === 0 ? (
                 <div className="text-gray-600">
                   <p className="mb-2">{'>'} Select an endpoint and click the request button</p>
-                  <p className="mb-2">{'>'} The server will return 402 Payment Required</p>
-                  <p className="mb-2">{'>'} Connect your WebAuth wallet and pay</p>
-                  <p className="cursor-blink">{'>'} Content unlocked</p>
+                  <p className="mb-2">{'>'} Server returns 402 + WWW-Authenticate: Payment header</p>
+                  <p className="mb-2">{'>'} Pay with WebAuth → sends Authorization: Payment credential</p>
+                  <p className="cursor-blink">{'>'} Receive content + Payment-Receipt header</p>
                 </div>
               ) : (
                 logs.map((log, i) => (
@@ -313,7 +401,9 @@ function PlaygroundContent() {
                                 ? 'text-terminal-green'
                                 : log.type === 'payment'
                                   ? 'text-purple-400'
-                                  : 'text-gray-400'
+                                  : log.type === 'header'
+                                    ? 'text-orange-400'
+                                    : 'text-gray-400'
                       }
                     >
                       {log.type === 'request' && '→ '}
@@ -321,6 +411,7 @@ function PlaygroundContent() {
                       {log.type === 'error' && '✗ '}
                       {log.type === 'success' && '✓ '}
                       {log.type === 'payment' && '💸 '}
+                      {log.type === 'header' && '⚡ '}
                       {log.text}
                     </span>
                   </div>

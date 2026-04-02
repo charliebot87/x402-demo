@@ -78,21 +78,21 @@ export default function Home() {
             {[
               {
                 step: '1',
-                title: 'Request',
-                desc: 'Client hits a paid endpoint. Server returns 402 with payment details — amount, recipient, unique memo.',
-                code: 'GET /api/joke → 402',
+                title: 'Challenge',
+                desc: 'Client hits a paid endpoint. Server returns 402 with WWW-Authenticate: Payment header containing the challenge.',
+                code: '← 402 + WWW-Authenticate: Payment',
               },
               {
                 step: '2',
                 title: 'Pay',
-                desc: 'Client sends XPR via WebAuth wallet. On-chain transfer with the memo as a payment receipt.',
+                desc: 'Client sends XPR via WebAuth wallet. Zero gas fees. Sub-second finality. Human-readable accounts.',
                 code: 'transfer 1 XPR → charliebot',
               },
               {
                 step: '3',
-                title: 'Access',
-                desc: 'Client retries with transaction proof. Server verifies on-chain, returns the paid content.',
-                code: 'GET /api/joke + tx → 200 🎉',
+                title: 'Verify',
+                desc: 'Client retries with Authorization: Payment credential. Server verifies on-chain, returns content + Payment-Receipt.',
+                code: '→ Authorization: Payment → 200 🎉',
               },
             ].map((s) => (
               <div key={s.step} className="p-6 rounded-xl bg-terminal-card border border-terminal-border">
