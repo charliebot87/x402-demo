@@ -22,7 +22,7 @@ function base64urlEncode(str: string): string {
 }
 
 function buildPaymentCredential(challenge: any, payload: Record<string, string>): string {
-  const credential = { challenge, payload }
+  const credential = { challengeId: challenge.id, payload }
   return `Payment ${base64urlEncode(JSON.stringify(credential))}`
 }
 
