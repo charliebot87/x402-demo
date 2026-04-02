@@ -113,6 +113,37 @@ function PlaygroundContent() {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [logs])
 
+  // Auto-restore wallet session on page load
+  useEffect(() => {
+    const restore = async () => {
+      try {
+        const ConnectWalletModule = await import('@proton/web-sdk')
+        const ConnectWallet = ConnectWalletModule.default
+        const { session } = await ConnectWallet({
+          linkOptions: {
+            endpoints: ['https://api.protonnz.com'],
+            chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace4bab97f437e0',
+            restoreSession: true,
+          },
+          transportOptions: {
+            requestAccount: 'charliebot',
+          },
+          uiOptions: {
+            appInfo: {
+              name: 'MPP Playground',
+              logo: 'https://x402.charliebot.dev/xpr-logo.svg',
+            },
+          },
+        })
+        if (session) {
+          setWalletSession(session)
+          setWalletAccount(session.auth.actor.toString())
+        }
+      } catch {}
+    }
+    restore()
+  }, [])
+
   const connectWallet = async () => {
     try {
       addLog('info', 'Connecting WebAuth wallet...')
@@ -122,7 +153,7 @@ function PlaygroundContent() {
         linkOptions: {
           endpoints: ['https://api.protonnz.com'],
           chainId: '384da888112027f0321850a169f737c33e53b388aad48b5adace4bab97f437e0',
-          restoreSession: false,
+          restoreSession: true,
         },
         transportOptions: {
           requestAccount: 'charliebot',
