@@ -240,42 +240,50 @@ function PlaygroundContent() {
       addLog('info', `tx: ${txId}`)
       addLog('info', `${EXPLORER}/transaction/${txId}`)
 
-      // Retry with credential
+      // Retry with credential — server-side retries Hyperion internally,
+      // but we also retry client-side in case of transient network issues.
       const authHeader = buildPaymentCredential(challenge, { txHash: txId })
-      addLog('request', `GET ${selectedEndpoint.path}`)
+      addLog('request', `→ GET ${selectedEndpoint.path}`)
       addLog('header', `Authorization: Payment <credential>`)
 
-      await new Promise((r) => setTimeout(r, 1500))
+      // Wait for Hyperion indexing — server retries internally but give it a head start
+      await new Promise((r) => setTimeout(r, 2000))
 
-      const resp = await fetch(selectedEndpoint.path, {
-        headers: { 'Authorization': authHeader },
-      })
+      const MAX_CLIENT_RETRIES = 3
+      let succeeded = false
 
-      if (resp.status === 200) {
-        const receiptHeader = resp.headers.get('payment-receipt')
-        if (receiptHeader) addLog('header', `Payment-Receipt: ${receiptHeader.substring(0, 60)}...`)
-        const data = await resp.json()
-        addLog('success', `← 200 OK — Content unlocked! 🎉`)
-        addLog('info', formatJson(data))
-      } else {
-        addLog('error', `← ${resp.status}`)
-        // Retry after delay
-        if (resp.status === 402) {
-          addLog('info', 'Waiting for Hyperion indexing...')
-          await new Promise((r) => setTimeout(r, 3000))
-          const resp2 = await fetch(selectedEndpoint.path, {
-            headers: { 'Authorization': authHeader },
-          })
-          if (resp2.status === 200) {
-            const data2 = await resp2.json()
-            addLog('success', `← 200 OK — Content unlocked! 🎉`)
-            addLog('info', formatJson(data2))
-          } else {
-            const data2 = await resp2.json().catch(() => ({}))
-            addLog('error', `← ${resp2.status} (retry)`)
-            addLog('info', formatJson(data2))
-          }
+      for (let attempt = 0; attempt <= MAX_CLIENT_RETRIES; attempt++) {
+        if (attempt > 0) {
+          const delay = 3000 * attempt
+          addLog('info', `Waiting for Hyperion indexing... (retry ${attempt}/${MAX_CLIENT_RETRIES})`)
+          await new Promise((r) => setTimeout(r, delay))
         }
+
+        const resp = await fetch(selectedEndpoint.path, {
+          headers: { 'Authorization': authHeader },
+        })
+
+        if (resp.status === 200) {
+          const receiptHeader = resp.headers.get('payment-receipt')
+          if (receiptHeader) addLog('header', `Payment-Receipt: ${receiptHeader.substring(0, 60)}...`)
+          const data = await resp.json()
+          addLog('success', `← 200 OK — Content unlocked! 🎉`)
+          addLog('info', formatJson(data))
+          succeeded = true
+          break
+        } else if (resp.status === 402 && attempt < MAX_CLIENT_RETRIES) {
+          addLog('error', `← 402 (attempt ${attempt + 1})`)
+          continue
+        } else {
+          const data = await resp.json().catch(() => ({}))
+          addLog('error', `← ${resp.status} (final attempt)`)
+          addLog('info', formatJson(data))
+          break
+        }
+      }
+
+      if (!succeeded) {
+        addLog('info', '⚠ Payment was sent on-chain but verification timed out. The server may still accept the credential on a fresh request.')
       }
 
       setChallenge(null)
