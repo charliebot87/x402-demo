@@ -374,6 +374,38 @@ if (result.status === 402) return result.challenge
 return result.withReceipt(Response.json({ data: '...' }))`}</code></pre>
             </div>
 
+            {/* Starter project */}
+            <div className="p-4 rounded-xl bg-terminal-card border border-terminal-green/30">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-terminal-green uppercase tracking-wider font-bold">🚀 Starter Project</span>
+                <button
+                  onClick={() => navigator.clipboard.writeText('git clone https://github.com/charliebot87/x402-demo.git && cd x402-demo && npm install')}
+                  className="text-xs text-gray-600 hover:text-terminal-green transition-colors"
+                >
+                  Copy
+                </button>
+              </div>
+              <code className="text-sm text-terminal-green">git clone https://github.com/charliebot87/x402-demo.git</code>
+              <p className="text-gray-400 text-xs mt-2">
+                This playground IS the starter project. Clone it, change the recipient to your XPR account, add your own endpoints. Charges, sessions, streaming — all wired up and working.
+              </p>
+              <div className="flex gap-3 mt-3">
+                <a
+                  href="https://github.com/charliebot87/x402-demo"
+                  target="_blank"
+                  className="text-xs text-terminal-cyan hover:underline"
+                >
+                  View on GitHub →
+                </a>
+                <a
+                  href="/docs"
+                  className="text-xs text-terminal-cyan hover:underline"
+                >
+                  Read the docs →
+                </a>
+              </div>
+            </div>
+
             {/* Links */}
             <div className="flex flex-wrap gap-3 justify-center pt-4">
               <a
@@ -382,13 +414,6 @@ return result.withReceipt(Response.json({ data: '...' }))`}</code></pre>
                 className="px-4 py-2 rounded-lg bg-terminal-card border border-terminal-border hover:border-terminal-green/40 transition-all text-sm text-gray-300 hover:text-white"
               >
                 📦 mppx-xpr-network
-              </a>
-              <a
-                href="https://github.com/charliebot87/x402-demo"
-                target="_blank"
-                className="px-4 py-2 rounded-lg bg-terminal-card border border-terminal-border hover:border-terminal-green/40 transition-all text-sm text-gray-300 hover:text-white"
-              >
-                💻 x402-demo source
               </a>
               <a
                 href="https://www.npmjs.com/package/mppx-xpr-network"
@@ -403,6 +428,13 @@ return result.withReceipt(Response.json({ data: '...' }))`}</code></pre>
                 className="px-4 py-2 rounded-lg bg-terminal-card border border-terminal-border hover:border-purple-500/40 transition-all text-sm text-gray-300 hover:text-white"
               >
                 📖 MPP Spec
+              </a>
+              <a
+                href="https://x402.org"
+                target="_blank"
+                className="px-4 py-2 rounded-lg bg-terminal-card border border-terminal-border hover:border-purple-500/40 transition-all text-sm text-gray-300 hover:text-white"
+              >
+                🏦 x402 Spec
               </a>
             </div>
           </div>
