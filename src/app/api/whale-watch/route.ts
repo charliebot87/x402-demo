@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   })
   const traders = await tradersResp.json()
 
-  const count = incrementCounter()
+  const count = await incrementCounter()
 
   return NextResponse.json({
     paid: true,

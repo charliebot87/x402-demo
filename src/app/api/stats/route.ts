@@ -4,7 +4,7 @@ import { ENDPOINTS } from '@/lib/constants'
 
 export async function GET() {
   return NextResponse.json({
-    totalPayments: getCount(),
+    totalPayments: await getCount(),
     endpoints: ENDPOINTS.map((e) => ({
       path: e.path,
       name: e.name,

@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   }
 
   const fortune = await generateCompletion(SYSTEM_PROMPT)
-  const count = incrementCounter()
+  const count = await incrementCounter()
 
   return NextResponse.json({
     paid: true,

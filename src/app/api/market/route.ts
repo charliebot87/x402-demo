@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   const statsResp = await fetch(`${INDEXER}/api/stats`, { next: { revalidate: 0 } })
   const stats = await statsResp.json()
 
-  const count = incrementCounter()
+  const count = await incrementCounter()
 
   return NextResponse.json({
     paid: true,
