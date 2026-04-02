@@ -8,13 +8,13 @@ export const EXPLORER = 'https://explorer.xprnetwork.org'
 export const SESSION_ENDPOINTS = [
   {
     path: '/api/stream',
-    name: 'Story Stream',
-    description: 'Open a vest session, stream an AI story word-by-word. Pay only for what you use — stop early and get a refund.',
+    name: 'Metered Stream',
+    description: '10 AI-generated facts streamed over ~90s. Live cost ticker shows XPR consumed in real-time. Stop early for a refund.',
     price: '10.0000',
-    priceLabel: '10 XPR',
+    priceLabel: '10 XPR max',
     icon: '📡',
     intent: 'session' as const,
-    duration: 300,
+    duration: 120,
   },
 ] as const
 

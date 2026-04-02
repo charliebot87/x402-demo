@@ -101,6 +101,8 @@ function PlaygroundContent() {
   const [walletAccount, setWalletAccount] = useState<string | null>(null)
   const [challenge, setChallenge] = useState<any>(null)
   const [challengeAmount, setChallengeAmount] = useState<string | null>(null)
+  const [streamCost, setStreamCost] = useState<{ current: number; max: number; chunks: number; totalChunks: number; elapsed: number } | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
 
   const now = () => new Date().toLocaleTimeString('en-US', { hour12: false })
@@ -405,40 +407,51 @@ function PlaygroundContent() {
         if (contentType.includes('text/event-stream') && resp.body) {
           addLog('success', `← 200 OK — Session active, streaming... 📡`)
           setStreaming(true)
+          setStreamCost(null)
 
           const reader = resp.body.getReader()
           const decoder = new TextDecoder()
-          let storyBuffer = ''
 
           try {
             while (true) {
               const { done, value } = await reader.read()
               if (done) break
 
-              const chunk = decoder.decode(value, { stream: true })
-              const lines = chunk.split('\n')
+              const rawChunk = decoder.decode(value, { stream: true })
+              const lines = rawChunk.split('\n')
 
               for (const line of lines) {
                 if (!line.startsWith('data: ')) continue
                 const data = line.slice(6).trim()
                 if (data === '[DONE]') {
-                  addLog('success', `✓ Stream complete`)
-                  addLog('stream', storyBuffer)
                   continue
                 }
                 try {
                   const parsed = JSON.parse(data)
-                  if (parsed.word) storyBuffer += parsed.word
-                  if (parsed.error) addLog('error', parsed.error)
+                  if (parsed.type === 'session_start') {
+                    addLog('info', `📡 Streaming ${parsed.totalChunks} chunks · ${parsed.costPerChunk} XPR each · ${(parsed.intervalMs / 1000).toFixed(0)}s intervals`)
+                    setStreamCost({ current: 0, max: parsed.maxCost, chunks: 0, totalChunks: parsed.totalChunks, elapsed: 0 })
+                  } else if (parsed.type === 'chunk') {
+                    addLog('stream', `[${parsed.index}/${parsed.total}] ${parsed.content}`)
+                    setStreamCost({ current: parsed.cost, max: parsed.maxCost, chunks: parsed.index, totalChunks: parsed.total, elapsed: parsed.elapsed })
+                  } else if (parsed.type === 'session_end') {
+                    addLog('success', `✓ Session complete — ${parsed.totalCost} XPR consumed in ${parsed.elapsed}s (${parsed.totalChunks} chunks)`)
+                    setStreamCost(null)
+                  } else if (parsed.type === 'error') {
+                    addLog('error', parsed.error)
+                  }
                 } catch {}
               }
             }
           } catch (e: any) {
-            addLog('error', `Stream error: ${e.message}`)
+            if (e.name !== 'AbortError') {
+              addLog('error', `Stream error: ${e.message}`)
+            }
           }
 
           setStreaming(false)
-          addLog('info', `Session complete. Vest "${vestName}" can be stopped/settled.`)
+          setStreamCost(null)
+          addLog('info', `Vest "${vestName}" can be stopped to claim refund.`)
         } else {
           const data = await resp.json()
           addLog('success', `← 200 OK — Content unlocked! 🎉`)
@@ -480,7 +493,7 @@ function PlaygroundContent() {
               <h1 className="text-xl font-bold text-white">
                 MPP <span className="text-terminal-green">Playground</span>
               </h1>
-              <span className="text-[10px] text-gray-600 ml-1">v3.2.0</span>
+              <span className="text-[10px] text-gray-600 ml-1">v3.3.0</span>
             </div>
           </div>
           {walletAccount ? (
@@ -613,6 +626,20 @@ function PlaygroundContent() {
                 </button>
               )}
 
+              {streaming && (
+                <button
+                  onClick={() => {
+                    abortControllerRef.current?.abort()
+                    setStreaming(false)
+                    setStreamCost(null)
+                    addLog('info', '⏹ Stream stopped by user. Vest can be settled for a refund.')
+                  }}
+                  className="px-5 py-2.5 bg-red-600 text-white font-bold rounded-lg hover:bg-red-500 transition-all text-sm"
+                >
+                  ⏹ Stop Stream
+                </button>
+              )}
+
               <div className="ml-auto">
                 <button
                   onClick={clearLogs}
@@ -622,6 +649,28 @@ function PlaygroundContent() {
                 </button>
               </div>
             </div>
+
+            {/* Live cost ticker */}
+            {streamCost && (
+              <div className="mb-4 p-3 rounded-lg bg-terminal-card border border-purple-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-purple-300 font-medium">📡 Live Session</span>
+                  <span className="text-sm text-terminal-green font-bold">
+                    {streamCost.current.toFixed(1)} / {streamCost.max.toFixed(1)} XPR
+                  </span>
+                </div>
+                <div className="w-full bg-gray-800 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-purple-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${(streamCost.current / streamCost.max) * 100}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Chunk {streamCost.chunks}/{streamCost.totalChunks}</span>
+                  <span>{streamCost.elapsed}s elapsed</span>
+                </div>
+              </div>
+            )}
             <div className="terminal-output min-h-[500px] max-h-[700px] overflow-y-auto">
               {logs.length === 0 ? (
                 <div className="text-gray-600">
