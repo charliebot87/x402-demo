@@ -5,6 +5,21 @@ export const RPC = 'https://api.protonnz.com'
 export const CHAIN_ID = '384da888112027f0321850a169f737c33e53b388aad48b5adace4bab97f437e0'
 export const EXPLORER = 'https://explorer.xprnetwork.org'
 
+export const SESSION_ENDPOINTS = [
+  {
+    path: '/api/stream',
+    name: 'Story Stream',
+    description: 'Open a vest session, stream an AI story word-by-word. Pay only for what you use — stop early and get a refund.',
+    price: '10.0000',
+    priceLabel: '10 XPR',
+    icon: '📡',
+    intent: 'session' as const,
+    duration: 300,
+  },
+] as const
+
+export type SessionEndpoint = (typeof SESSION_ENDPOINTS)[number]
+
 export const ENDPOINTS = [
   {
     path: '/api/joke',
@@ -41,3 +56,4 @@ export const ENDPOINTS = [
 ] as const
 
 export type Endpoint = (typeof ENDPOINTS)[number]
+export type AnyEndpoint = Endpoint | SessionEndpoint

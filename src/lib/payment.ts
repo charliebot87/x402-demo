@@ -1,6 +1,6 @@
 import { Mppx } from 'mppx/server'
 import { xpr } from 'mppx-xpr-network'
-import { RECIPIENT, HYPERION } from './constants'
+import { RECIPIENT, HYPERION, RPC } from './constants'
 
 /**
  * Spec-compliant MPP payment handler using mppx SDK.
@@ -15,6 +15,10 @@ export const mppx = Mppx.create({
     xpr.charge({
       recipient: RECIPIENT,
       hyperion: HYPERION,
+    }),
+    xpr.session({
+      recipient: RECIPIENT,
+      rpc: RPC,
     }),
   ],
   secretKey: process.env.MPP_SECRET_KEY || 'x402-playground-secret-key-change-in-production',
