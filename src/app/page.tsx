@@ -66,6 +66,12 @@ export default function Home() {
             >
               Open Playground →
             </Link>
+            <Link
+              href="/docs"
+              className="px-8 py-3 border border-terminal-border text-gray-400 rounded-lg hover:border-terminal-green/50 hover:text-terminal-green transition-all"
+            >
+              Docs
+            </Link>
             <a
               href="/llms.txt"
               className="px-8 py-3 border border-terminal-border text-gray-400 rounded-lg hover:border-terminal-green/50 hover:text-terminal-green transition-all"

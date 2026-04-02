@@ -501,6 +501,9 @@ function PlaygroundContent() {
               </h1>
               <span className="text-[10px] text-gray-600 ml-1">v{VERSION}</span>
             </div>
+            <Link href="/docs" className="text-xs text-gray-500 hover:text-terminal-green transition-colors ml-2">
+              Docs →
+            </Link>
           </div>
           {walletAccount ? (
             <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-terminal-card border border-terminal-green/30">
