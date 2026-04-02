@@ -22,8 +22,20 @@ function base64urlEncode(str: string): string {
 }
 
 function buildPaymentCredential(challenge: any, payload: Record<string, string>): string {
-  const credential = { challengeId: challenge.id, payload }
-  return `Payment ${base64urlEncode(JSON.stringify(credential))}`
+  // Reconstruct the wire format that mppx Credential.deserialize expects
+  const wire = {
+    challenge: {
+      id: challenge.id,
+      method: challenge.method,
+      intent: challenge.intent || 'charge',
+      realm: challenge.realm,
+      ...(challenge.expires && { expires: challenge.expires }),
+      // request must be base64url-encoded JSON string (not the decoded object)
+      request: challenge._rawRequest || base64urlEncode(JSON.stringify(challenge.request)),
+    },
+    payload,
+  }
+  return `Payment ${base64urlEncode(JSON.stringify(wire))}`
 }
 
 function parseWwwAuthenticate(response: Response): any | null {
@@ -53,6 +65,7 @@ function parseWwwAuthenticate(response: Response): any | null {
       intent: params.intent || 'charge',
       expires: params.expires,
       request,
+      _rawRequest: params.request, // preserve original base64url for credential
     }
   } catch {
     return null
