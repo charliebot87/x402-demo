@@ -284,7 +284,7 @@ export default function Home() {
               llms.txt
             </a>
           </p>
-          <p className="mt-2 text-xs text-gray-700">v3.1.0 · mppx-xpr-network v1.3.2</p>
+          <p className="mt-2 text-xs text-gray-700">v3.2.0 · mppx-xpr-network v1.3.3</p>
         </footer>
       </div>
     </main>
