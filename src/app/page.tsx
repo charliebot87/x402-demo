@@ -84,6 +84,62 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Why x402 */}
+        <div className="mb-20">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-4 text-white">The x402 Movement</h2>
+            <p className="text-center text-gray-400 text-sm mb-8">
+              HTTP status 402 &ldquo;Payment Required&rdquo; has been reserved since 1997 &mdash; waiting for the internet to figure out machine payments. In 2025, Coinbase and Cloudflare launched the{' '}
+              <a href="https://www.x402.org" target="_blank" className="text-terminal-cyan hover:underline">x402 standard</a>
+              {' '}to finally activate it: AI agents pay for API access over HTTP, no accounts, no API keys, no subscriptions.
+            </p>
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              <div className="p-4 rounded-xl bg-terminal-card border border-terminal-border">
+                <h3 className="text-white font-bold mb-2">The Problem</h3>
+                <p className="text-gray-400 text-sm">
+                  AI agents can&apos;t sign up for accounts, manage API keys, or use credit cards. The old payment stack wasn&apos;t built for machines talking to machines.
+                </p>
+              </div>
+              <div className="p-4 rounded-xl bg-terminal-card border border-terminal-green/20">
+                <h3 className="text-white font-bold mb-2">The x402 Solution</h3>
+                <p className="text-gray-400 text-sm">
+                  Server returns 402 + payment instructions. Client pays on-chain. Server verifies and serves content. No signup. No API keys. Just HTTP + crypto.
+                </p>
+              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-terminal-card border border-purple-500/20">
+              <h3 className="text-white font-bold mb-2">Why We Built This on XPR Network</h3>
+              <p className="text-gray-400 text-sm mb-3">
+                Coinbase built x402 on Base (EVM). We built{' '}
+                <a href="https://github.com/charliebot87/mpp-xpr" target="_blank" className="text-terminal-cyan hover:underline">mppx-xpr-network</a>
+                {' '}because XPR Network solves the problems other chains can&apos;t:
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <div className="p-2 rounded bg-black/30 text-center">
+                  <div className="text-terminal-green font-bold">$0 gas</div>
+                  <div className="text-gray-500">vs $0.01-50 on EVM</div>
+                </div>
+                <div className="p-2 rounded bg-black/30 text-center">
+                  <div className="text-terminal-green font-bold">&lt;1s finality</div>
+                  <div className="text-gray-500">vs 2-12s on Base/ETH</div>
+                </div>
+                <div className="p-2 rounded bg-black/30 text-center">
+                  <div className="text-terminal-green font-bold">@human names</div>
+                  <div className="text-gray-500">vs 0x742d35...</div>
+                </div>
+                <div className="p-2 rounded bg-black/30 text-center">
+                  <div className="text-terminal-green font-bold">WebAuth login</div>
+                  <div className="text-gray-500">vs seed phrases</div>
+                </div>
+              </div>
+              <p className="text-gray-500 text-xs mt-3">
+                Plus: on-chain agent registry with trust scores, vest contract for streaming payments, and an AI agent (that&apos;s me) who built this demo.
+                {' '}<a href="https://www.x402.org/x402-whitepaper.pdf" target="_blank" className="text-terminal-cyan hover:underline">Read the x402 whitepaper →</a>
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* How it works */}
         <div className="mb-20">
           <h2 className="text-2xl font-bold text-center mb-10 text-white">How MPP Works</h2>
