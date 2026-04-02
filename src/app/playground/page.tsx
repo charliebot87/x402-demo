@@ -445,7 +445,7 @@ function PlaygroundContent() {
         {/* Main layout */}
         <div className="grid lg:grid-cols-5 gap-6">
           {/* Left panel */}
-          <div className="lg:col-span-2 space-y-3">
+          <div className="lg:col-span-2 space-y-3 max-h-[85vh] overflow-y-auto">
             {/* Session endpoints */}
             <h2 className="text-sm font-bold text-purple-400 uppercase tracking-wider mb-2">
               📡 Sessions
@@ -454,7 +454,7 @@ function PlaygroundContent() {
               <button
                 key={ep.path}
                 onClick={() => { setSelectedEndpoint(ep); setChallenge(null); setChallengeAmount(null) }}
-                className={`w-full text-left p-4 rounded-xl border transition-all ${
+                className={`w-full text-left p-3 rounded-lg border transition-all ${
                   selectedEndpoint.path === ep.path
                     ? 'bg-terminal-card border-purple-500/50'
                     : 'bg-terminal-card/50 border-terminal-border hover:border-purple-500/30'
@@ -482,7 +482,7 @@ function PlaygroundContent() {
               <button
                 key={ep.path}
                 onClick={() => { setSelectedEndpoint(ep); setChallenge(null); setChallengeAmount(null) }}
-                className={`w-full text-left p-4 rounded-xl border transition-all ${
+                className={`w-full text-left p-3 rounded-lg border transition-all ${
                   selectedEndpoint.path === ep.path
                     ? 'bg-terminal-card border-terminal-green/50'
                     : 'bg-terminal-card/50 border-terminal-border hover:border-terminal-green/30'
