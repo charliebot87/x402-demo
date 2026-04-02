@@ -102,6 +102,7 @@ function PlaygroundContent() {
   const [challenge, setChallenge] = useState<any>(null)
   const [challengeAmount, setChallengeAmount] = useState<string | null>(null)
   const [streamCost, setStreamCost] = useState<{ current: number; max: number; chunks: number; totalChunks: number; elapsed: number } | null>(null)
+  const [activeVestName, setActiveVestName] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
 
@@ -384,6 +385,7 @@ function PlaygroundContent() {
 
       const txId = result?.processed?.id || result?.transaction_id || result?.transactionId || 'unknown'
       addLog('success', `✓ Vest session opened!`)
+      setActiveVestName(vestName)
       addLog('info', `tx: ${txId}`)
       addLog('info', `${EXPLORER}/transaction/${txId}`)
 
@@ -455,6 +457,7 @@ function PlaygroundContent() {
 
           setStreaming(false)
           setStreamCost(null)
+          setActiveVestName(null)
         } else {
           const data = await resp.json()
           addLog('success', `← 200 OK — Content unlocked! 🎉`)
@@ -631,15 +634,49 @@ function PlaygroundContent() {
 
               {streaming && (
                 <button
-                  onClick={() => {
+                  onClick={async () => {
+                    // 1. Abort the fetch stream
                     abortControllerRef.current?.abort()
                     setStreaming(false)
+                    const costAtStop = streamCost?.current || 0
+                    const maxCost = streamCost?.max || 0
                     setStreamCost(null)
-                    addLog('info', '⏹ Stream stopped by user. Vest can be settled for a refund.')
+                    addLog('info', `⏹ Stream stopped at ${costAtStop.toFixed(1)} / ${maxCost.toFixed(1)} XPR`)
+
+                    // 2. Sign stopvest transaction to claim refund
+                    if (walletSession && activeVestName) {
+                      try {
+                        const account = walletSession.auth.actor.toString()
+                        addLog('payment', `Stopping vest "${activeVestName}" on-chain...`)
+                        const stopResult = await walletSession.transact(
+                          {
+                            actions: [
+                              {
+                                account: 'vest',
+                                name: 'stopvest',
+                                authorization: [{ actor: account, permission: 'active' }],
+                                data: {
+                                  from: account,
+                                  vestName: activeVestName,
+                                },
+                              },
+                            ],
+                          },
+                          { broadcast: true }
+                        )
+                        const txId = stopResult?.processed?.id || stopResult?.transaction_id || 'unknown'
+                        const refund = (maxCost - costAtStop).toFixed(4)
+                        addLog('success', `✓ Vest stopped! ~${refund} XPR refunded`)
+                        addLog('info', `${EXPLORER}/transaction/${txId}`)
+                        setActiveVestName(null)
+                      } catch (e: any) {
+                        addLog('error', `Failed to stop vest: ${e.message}`)
+                      }
+                    }
                   }}
                   className="px-5 py-2.5 bg-red-600 text-white font-bold rounded-lg hover:bg-red-500 transition-all text-sm"
                 >
-                  ⏹ Stop Stream
+                  ⏹ Stop & Refund
                 </button>
               )}
 
