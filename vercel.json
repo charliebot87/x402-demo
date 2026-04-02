@@ -1,8 +1,3 @@
 {
-  "buildCommand": "",
-  "outputDirectory": "",
-  "rewrites": [
-    { "source": "/", "destination": "/api/index" },
-    { "source": "/llms.txt", "destination": "/api/llms-txt" }
-  ]
+  "framework": "nextjs"
 }
