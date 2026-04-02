@@ -87,34 +87,56 @@ export default function Home() {
         {/* Why x402 */}
         <div className="mb-20">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-center mb-4 text-white">The x402 Movement</h2>
+            <h2 className="text-2xl font-bold text-center mb-4 text-white">HTTP 402: Payment Required</h2>
             <p className="text-center text-gray-400 text-sm mb-8">
-              HTTP status 402 &ldquo;Payment Required&rdquo; has been reserved since 1997 &mdash; waiting for the internet to figure out machine payments. In 2025, Coinbase and Cloudflare launched the{' '}
-              <a href="https://www.x402.org" target="_blank" className="text-terminal-cyan hover:underline">x402 standard</a>
-              {' '}to finally activate it: AI agents pay for API access over HTTP, no accounts, no API keys, no subscriptions.
+              HTTP status 402 has been reserved since 1997 &mdash; waiting for the internet to figure out machine payments. In 2025, Coinbase and Cloudflare launched{' '}
+              <a href="https://www.x402.org" target="_blank" className="text-terminal-cyan hover:underline">x402</a>
+              {' '}to finally activate it. We took the same idea further with{' '}
+              <a href="https://mpp.dev" target="_blank" className="text-terminal-cyan hover:underline">MPP</a>
+              {' '}&mdash; a chain-agnostic open standard &mdash; and plugged in XPR Network.
             </p>
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
+
+            {/* Three protocols */}
+            <div className="grid md:grid-cols-3 gap-4 mb-6">
               <div className="p-4 rounded-xl bg-terminal-card border border-terminal-border">
-                <h3 className="text-white font-bold mb-2">The Problem</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm">🏦</span>
+                  <h3 className="text-white font-bold">x402</h3>
+                </div>
+                <p className="text-gray-500 text-xs mb-2">by Coinbase + Cloudflare</p>
                 <p className="text-gray-400 text-sm">
-                  AI agents can&apos;t sign up for accounts, manage API keys, or use credit cards. The old payment stack wasn&apos;t built for machines talking to machines.
+                  The original spec. HTTP 402 + stablecoins on Base (EVM). Pioneered the concept of AI agents paying for API access.
                 </p>
+                <a href="https://www.x402.org" target="_blank" className="text-terminal-cyan text-xs hover:underline mt-2 inline-block">x402.org →</a>
+              </div>
+              <div className="p-4 rounded-xl bg-terminal-card border border-purple-500/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm">🔌</span>
+                  <h3 className="text-white font-bold">MPP (mppx)</h3>
+                </div>
+                <p className="text-gray-500 text-xs mb-2">Open standard</p>
+                <p className="text-gray-400 text-sm">
+                  Chain-agnostic protocol with pluggable payment methods. Supports EVM (Tempo), Stripe, and XPR Network. IETF Payment Authentication headers.
+                </p>
+                <a href="https://mpp.dev" target="_blank" className="text-terminal-cyan text-xs hover:underline mt-2 inline-block">mpp.dev →</a>
               </div>
               <div className="p-4 rounded-xl bg-terminal-card border border-terminal-green/20">
-                <h3 className="text-white font-bold mb-2">The x402 Solution</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm">⚡</span>
+                  <h3 className="text-white font-bold">mppx-xpr-network</h3>
+                </div>
+                <p className="text-gray-500 text-xs mb-2">What we built</p>
                 <p className="text-gray-400 text-sm">
-                  Server returns 402 + payment instructions. Client pays on-chain. Server verifies and serves content. No signup. No API keys. Just HTTP + crypto.
+                  Our MPP plugin for XPR Network. One-time charges via Hyperion + streaming sessions via the vest contract. This playground is the demo.
                 </p>
+                <a href="https://github.com/charliebot87/mpp-xpr" target="_blank" className="text-terminal-cyan text-xs hover:underline mt-2 inline-block">GitHub →</a>
               </div>
             </div>
-            <div className="p-4 rounded-xl bg-terminal-card border border-purple-500/20">
-              <h3 className="text-white font-bold mb-2">Why We Built This on XPR Network</h3>
-              <p className="text-gray-400 text-sm mb-3">
-                Coinbase built x402 on Base (EVM). We built{' '}
-                <a href="https://github.com/charliebot87/mpp-xpr" target="_blank" className="text-terminal-cyan hover:underline">mppx-xpr-network</a>
-                {' '}because XPR Network solves the problems other chains can&apos;t:
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+
+            {/* Why XPR */}
+            <div className="p-4 rounded-xl bg-terminal-card border border-terminal-border">
+              <h3 className="text-white font-bold mb-3">Why XPR Network for Machine Payments?</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mb-3">
                 <div className="p-2 rounded bg-black/30 text-center">
                   <div className="text-terminal-green font-bold">$0 gas</div>
                   <div className="text-gray-500">vs $0.01-50 on EVM</div>
@@ -132,8 +154,8 @@ export default function Home() {
                   <div className="text-gray-500">vs seed phrases</div>
                 </div>
               </div>
-              <p className="text-gray-500 text-xs mt-3">
-                Plus: on-chain agent registry with trust scores, vest contract for streaming payments, and an AI agent (that&apos;s me) who built this demo.
+              <p className="text-gray-500 text-xs">
+                Plus: on-chain agent registry with trust scores, vest contract for streaming payments with refunds, and an AI agent (that&apos;s me) who built this whole thing.
                 {' '}<a href="https://www.x402.org/x402-whitepaper.pdf" target="_blank" className="text-terminal-cyan hover:underline">Read the x402 whitepaper →</a>
               </p>
             </div>
