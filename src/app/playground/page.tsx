@@ -535,12 +535,16 @@ function PlaygroundContent() {
               </button>
             ))}
 
-            {/* Action buttons */}
-            <div className="space-y-3 pt-4">
+          </div>
+
+          {/* Right panel: action buttons + terminal output */}
+          <div className="lg:col-span-3">
+            {/* Action buttons - always visible above terminal */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
               <button
                 onClick={requestEndpoint}
                 disabled={loading || streaming}
-                className={`w-full px-4 py-3 bg-terminal-card border font-bold rounded-lg transition-all disabled:opacity-50 text-sm ${
+                className={`px-5 py-2.5 bg-terminal-card border font-bold rounded-lg transition-all disabled:opacity-50 text-sm ${
                   isSession
                     ? 'border-purple-500/30 text-purple-300 hover:bg-purple-500/10'
                     : 'border-terminal-cyan/30 text-terminal-cyan hover:bg-terminal-cyan/10'
@@ -553,9 +557,9 @@ function PlaygroundContent() {
                 <button
                   onClick={sendChargePayment}
                   disabled={loading}
-                  className="w-full px-4 py-3 bg-terminal-green text-black font-bold rounded-lg hover:bg-terminal-green/90 transition-all disabled:opacity-50 text-sm"
+                  className="px-5 py-2.5 bg-terminal-green text-black font-bold rounded-lg hover:bg-terminal-green/90 transition-all disabled:opacity-50 text-sm"
                 >
-                  {loading ? 'Processing...' : `Pay ${challengeAmount} XPR with WebAuth`}
+                  {loading ? 'Processing...' : `💸 Pay ${challengeAmount} XPR`}
                 </button>
               )}
 
@@ -563,35 +567,29 @@ function PlaygroundContent() {
                 <button
                   onClick={openSession}
                   disabled={loading || streaming}
-                  className="w-full px-4 py-3 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-500 transition-all disabled:opacity-50 text-sm"
+                  className="px-5 py-2.5 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-500 transition-all disabled:opacity-50 text-sm"
                 >
-                  {streaming ? '📡 Streaming...' : loading ? 'Processing...' : `Open Session — Deposit ${challengeAmount} XPR`}
+                  {streaming ? '📡 Streaming...' : loading ? 'Processing...' : `📡 Open Session — ${challengeAmount} XPR`}
                 </button>
               )}
 
               {challenge && !walletAccount && (
                 <button
                   onClick={connectWallet}
-                  className="w-full px-4 py-3 bg-terminal-green/20 border border-terminal-green/30 text-terminal-green font-bold rounded-lg hover:bg-terminal-green/30 transition-all text-sm"
+                  className="px-5 py-2.5 bg-terminal-green/20 border border-terminal-green/30 text-terminal-green font-bold rounded-lg hover:bg-terminal-green/30 transition-all text-sm"
                 >
                   Connect Wallet to Pay
                 </button>
               )}
-            </div>
-          </div>
 
-          {/* Right panel: terminal output */}
-          <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
-                Request / Response
-              </h2>
-              <button
-                onClick={clearLogs}
-                className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-              >
-                Clear
-              </button>
+              <div className="ml-auto">
+                <button
+                  onClick={clearLogs}
+                  className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
             <div className="terminal-output min-h-[500px] max-h-[700px] overflow-y-auto">
               {logs.length === 0 ? (
