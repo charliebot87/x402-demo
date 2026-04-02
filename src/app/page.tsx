@@ -252,6 +252,78 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Get Started */}
+        <div className="mb-20">
+          <h2 className="text-2xl font-bold text-center mb-4 text-white">Get Started</h2>
+          <p className="text-center text-gray-500 text-sm mb-10">
+            Add machine payments to your API in under 10 lines of code.
+          </p>
+          <div className="max-w-2xl mx-auto space-y-4">
+            {/* Install */}
+            <div className="p-4 rounded-xl bg-terminal-card border border-terminal-border">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-gray-500 uppercase tracking-wider">Install</span>
+                <button
+                  onClick={() => navigator.clipboard.writeText('npm install mppx mppx-xpr-network')}
+                  className="text-xs text-gray-600 hover:text-terminal-green transition-colors"
+                >
+                  Copy
+                </button>
+              </div>
+              <code className="text-sm text-terminal-green">npm install mppx mppx-xpr-network</code>
+            </div>
+
+            {/* Server code */}
+            <div className="p-4 rounded-xl bg-terminal-card border border-terminal-border">
+              <span className="text-xs text-gray-500 uppercase tracking-wider">Server — 6 lines</span>
+              <pre className="mt-2 text-xs text-gray-300 overflow-x-auto"><code>{`import { Mppx } from 'mppx/server'
+import { xpr } from 'mppx-xpr-network'
+
+const mppx = Mppx.create({
+  methods: [xpr.charge({ recipient: 'yourname' })],
+  secretKey: process.env.MPP_SECRET_KEY,
+})
+
+// In your route:
+const result = await mppx.xpr.charge({ amount: '1.0000 XPR' })(request)
+if (result.status === 402) return result.challenge
+return result.withReceipt(Response.json({ data: '...' }))`}</code></pre>
+            </div>
+
+            {/* Links */}
+            <div className="flex flex-wrap gap-3 justify-center pt-4">
+              <a
+                href="https://github.com/charliebot87/mpp-xpr"
+                target="_blank"
+                className="px-4 py-2 rounded-lg bg-terminal-card border border-terminal-border hover:border-terminal-green/40 transition-all text-sm text-gray-300 hover:text-white"
+              >
+                📦 mppx-xpr-network
+              </a>
+              <a
+                href="https://github.com/charliebot87/x402-demo"
+                target="_blank"
+                className="px-4 py-2 rounded-lg bg-terminal-card border border-terminal-border hover:border-terminal-green/40 transition-all text-sm text-gray-300 hover:text-white"
+              >
+                💻 x402-demo source
+              </a>
+              <a
+                href="https://www.npmjs.com/package/mppx-xpr-network"
+                target="_blank"
+                className="px-4 py-2 rounded-lg bg-terminal-card border border-terminal-border hover:border-terminal-green/40 transition-all text-sm text-gray-300 hover:text-white"
+              >
+                npm → mppx-xpr-network
+              </a>
+              <a
+                href="https://mpp.dev"
+                target="_blank"
+                className="px-4 py-2 rounded-lg bg-terminal-card border border-terminal-border hover:border-purple-500/40 transition-all text-sm text-gray-300 hover:text-white"
+              >
+                📖 MPP Spec
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Footer */}
         <footer className="text-center text-gray-600 text-sm pb-10">
           <div className="flex items-center justify-center gap-2 mb-3">
