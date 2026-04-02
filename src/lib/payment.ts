@@ -37,11 +37,65 @@ export async function handlePaidRequest(
   const result = await mppx.xpr.charge({ amount, recipient: RECIPIENT })(request)
 
   if (result.status === 402) {
-    return result.challenge
+    return enrichChallengeResponse(result.challenge)
   }
 
   const content = await contentFn()
   return result.withReceipt(Response.json(content))
+}
+
+/**
+ * Clone a 402 challenge response so the body contains the parsed challenge JSON.
+ * This ensures the client can read the challenge even if the browser/CDN strips
+ * the WWW-Authenticate header.
+ */
+export function enrichChallengeResponse(response: Response): Response {
+  const wwwAuth = response.headers.get('www-authenticate')
+  if (!wwwAuth) return response
+
+  // Parse the challenge from the header
+  const challenge = parseChallengeHeader(wwwAuth)
+  if (!challenge) return response
+
+  // Clone headers and add JSON body with the challenge
+  const headers = new Headers(response.headers)
+  headers.set('content-type', 'application/json')
+
+  return new Response(JSON.stringify({ challenge }), {
+    status: 402,
+    statusText: 'Payment Required',
+    headers,
+  })
+}
+
+function parseChallengeHeader(header: string): Record<string, any> | null {
+  if (!header.startsWith('Payment ')) return null
+  try {
+    const params: Record<string, string> = {}
+    const paramStr = header.slice('Payment '.length)
+    const regex = /(\w+)="([^"]*)"/g
+    let match
+    while ((match = regex.exec(paramStr)) !== null) {
+      params[match[1]] = match[2]
+    }
+    let request: any = {}
+    if (params.request) {
+      try {
+        const decoded = atob(params.request.replace(/-/g, '+').replace(/_/g, '/'))
+        request = JSON.parse(decoded)
+      } catch {}
+    }
+    return {
+      id: params.id,
+      realm: params.realm,
+      method: params.method,
+      intent: params.intent || 'charge',
+      expires: params.expires,
+      request,
+    }
+  } catch {
+    return null
+  }
 }
 
 

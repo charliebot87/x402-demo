@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@proton/web-sdk": "^4.4.2",
+    "@proton/web-sdk": "^5.0.0-rc-5",
     "mppx": "^0.5.3",
     "mppx-xpr-network": "^1.1.0",
     "next": "14.2.29",

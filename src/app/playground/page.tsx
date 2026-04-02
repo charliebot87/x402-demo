@@ -38,11 +38,10 @@ function buildPaymentCredential(challenge: any, payload: Record<string, string>)
   return `Payment ${base64urlEncode(JSON.stringify(wire))}`
 }
 
-function parseWwwAuthenticate(response: Response): any | null {
+function parseWwwAuthenticateHeader(response: Response): any | null {
   const header = response.headers.get('www-authenticate')
   if (!header || !header.startsWith('Payment ')) return null
   try {
-    // Parse RFC-style params: Payment id="...", realm="...", method="...", ...
     const params: Record<string, string> = {}
     const paramStr = header.slice('Payment '.length)
     const regex = /(\w+)="([^"]*)"/g
@@ -50,7 +49,6 @@ function parseWwwAuthenticate(response: Response): any | null {
     while ((match = regex.exec(paramStr)) !== null) {
       params[match[1]] = match[2]
     }
-    // Decode the request param (base64 JSON)
     let request: any = {}
     if (params.request) {
       try {
@@ -70,6 +68,20 @@ function parseWwwAuthenticate(response: Response): any | null {
   } catch {
     return null
   }
+}
+
+async function parseChallenge(response: Response): Promise<any | null> {
+  // Try header first
+  const fromHeader = parseWwwAuthenticateHeader(response)
+  if (fromHeader?.id) return fromHeader
+
+  // Fallback: try reading challenge from response body
+  try {
+    const body = await response.clone().json()
+    if (body?.challenge?.id) return body.challenge
+  } catch {}
+
+  return null
 }
 
 function isSessionEndpoint(ep: AnyEndpoint): ep is SessionEndpoint {
@@ -115,9 +127,11 @@ function PlaygroundContent() {
         transportOptions: {
           requestAccount: 'charliebot',
         },
-        selectorOptions: {
-          appName: 'MPP Playground',
-          appLogo: 'https://x402.charliebot.dev/xpr-logo.svg',
+        uiOptions: {
+          appInfo: {
+            name: 'MPP Playground',
+            logo: 'https://x402.charliebot.dev/xpr-logo.svg',
+          },
         },
       })
       if (!session) throw new Error('No session returned')
@@ -147,7 +161,7 @@ function PlaygroundContent() {
           addLog('header', `WWW-Authenticate: ${wwwAuth.substring(0, 80)}...`)
         }
 
-        const parsedChallenge = parseWwwAuthenticate(resp)
+        const parsedChallenge = await parseChallenge(resp)
 
         if (parsedChallenge) {
           setChallenge(parsedChallenge)

@@ -1,4 +1,4 @@
-import { mppx } from '@/lib/payment'
+import { mppx, enrichChallengeResponse } from '@/lib/payment'
 import { RECIPIENT } from '@/lib/constants'
 
 const AMOUNT = '10.0000 XPR'
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     vestName: generateVestName(),
   })(request)
 
-  if (result.status === 402) return result.challenge
+  if (result.status === 402) return enrichChallengeResponse(result.challenge)
 
   // Stream a story word-by-word using OpenAI
   const apiKey = process.env.OPENAI_API_KEY
