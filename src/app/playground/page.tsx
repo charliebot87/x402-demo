@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ENDPOINTS, SESSION_ENDPOINTS, RECIPIENT, EXPLORER, type Endpoint, type SessionEndpoint, type AnyEndpoint } from '@/lib/constants'
+import { ENDPOINTS, SESSION_ENDPOINTS, RECIPIENT, EXPLORER, VERSION, type Endpoint, type SessionEndpoint, type AnyEndpoint } from '@/lib/constants'
 
 const ALL_ENDPOINTS: AnyEndpoint[] = [...SESSION_ENDPOINTS, ...ENDPOINTS]
 
@@ -499,7 +499,7 @@ function PlaygroundContent() {
               <h1 className="text-xl font-bold text-white">
                 MPP <span className="text-terminal-green">Playground</span>
               </h1>
-              <span className="text-[10px] text-gray-600 ml-1">v3.3.0</span>
+              <span className="text-[10px] text-gray-600 ml-1">v{VERSION}</span>
             </div>
           </div>
           {walletAccount ? (

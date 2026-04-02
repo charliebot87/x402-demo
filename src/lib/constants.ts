@@ -1,3 +1,4 @@
+export const VERSION = process.env.NEXT_PUBLIC_APP_VERSION || 'dev'
 export const RECIPIENT = 'charliebot'
 export const HYPERION = 'https://proton.eosusa.io'
 export const INDEXER = 'https://indexer.protonnz.com'

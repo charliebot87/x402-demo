@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ENDPOINTS, SESSION_ENDPOINTS } from '@/lib/constants'
+import { ENDPOINTS, SESSION_ENDPOINTS, VERSION } from '@/lib/constants'
 
 export default function Home() {
   const [totalPayments, setTotalPayments] = useState(0)
@@ -284,7 +284,7 @@ export default function Home() {
               llms.txt
             </a>
           </p>
-          <p className="mt-2 text-xs text-gray-700">v3.3.0 · mppx-xpr-network v1.3.3</p>
+          <p className="mt-2 text-xs text-gray-700">v{VERSION}</p>
         </footer>
       </div>
     </main>
