@@ -394,8 +394,12 @@ function PlaygroundContent() {
 
       await new Promise((r) => setTimeout(r, 2000))
 
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+
       const resp = await fetch(selectedEndpoint.path, {
         headers: { 'Authorization': authHeader },
+        signal: abortController.signal,
       })
 
       if (resp.status === 200) {
