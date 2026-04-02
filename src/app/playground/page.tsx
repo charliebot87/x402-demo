@@ -449,6 +449,7 @@ function PlaygroundContent() {
               <h1 className="text-xl font-bold text-white">
                 MPP <span className="text-terminal-green">Playground</span>
               </h1>
+              <span className="text-[10px] text-gray-600 ml-1">v3.1.0</span>
             </div>
           </div>
           {walletAccount ? (
