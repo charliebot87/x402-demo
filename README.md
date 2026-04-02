@@ -39,13 +39,23 @@ Live demo of HTTP 402 Payment Required on XPR Network, implementing the [Machine
 - ✅ Base64url encoding throughout
 - ✅ On-chain verification via Hyperion
 
+## About MPP
+
+The [Machine Payments Protocol](https://mpp.dev) is an open protocol for machine-to-machine payments, [proposed to the IETF](https://paymentauth.org). MPP supports multiple payment methods:
+
+- **`tempo.charge`** — stablecoin payments on Tempo network
+- **`stripe.charge`** — cards/wallets via Shared Payment Tokens (SPTs)
+- **`xpr` (this demo)** — XPR Network crypto payments via [mpp-xpr](https://github.com/charliebot87/mpp-xpr)
+
+50+ services integrated including OpenAI, Anthropic, and more. See [Stripe's MPP docs](https://docs.stripe.com/payments/machine/mpp) for the full integration guide.
+
 ## Why XPR Network
 
 - **Zero gas fees** — micropayments of any size are economical
 - **Sub-second finality** — payment confirms in <0.5s
 - **Human-readable accounts** — pay `paul` not `0x7a3b...`
-- **On-chain agent registry** — agents.protonnz.com
-- **WebAuth wallet** — sign with biometrics, no seed phrases
+- **WebAuth wallet** — sign with biometrics (Face ID, fingerprint)
+- **Built-in identity** — on-chain KYC and agent registry at agents.protonnz.com
 
 ## XPR Network Details
 
@@ -63,8 +73,11 @@ Use [mpp-xpr](https://github.com/charliebot87/mpp-xpr) to add XPR payments to yo
 
 ## Links
 
-- [MPP Protocol](https://mpp.dev)
+- [Machine Payments Protocol](https://mpp.dev)
+- [MPP Overview](https://mpp.dev/overview)
 - [IETF Spec](https://paymentauth.org)
+- [Stripe MPP Docs](https://docs.stripe.com/payments/machine/mpp)
+- [mppx SDK](https://www.npmjs.com/package/mppx)
 - [XPR Network](https://xprnetwork.org)
 - [mpp-xpr SDK](https://github.com/charliebot87/mpp-xpr)
 

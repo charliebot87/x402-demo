@@ -3,12 +3,15 @@ export default function handler(req: any, res: any) {
   res.send(`# x402 — XPR Network Machine Payments
 # Live demo of HTTP 402 Payment Required on XPR Network
 # Implements the Machine Payments Protocol (MPP) — https://mpp.dev
-# Spec: https://paymentauth.org/
+# IETF Spec: https://paymentauth.org
+# Stripe MPP Docs: https://docs.stripe.com/payments/machine/mpp
+# mppx SDK: https://www.npmjs.com/package/mppx
 
 ## Overview
 
 This API demonstrates machine-to-machine payments on XPR Network using HTTP 402.
-Zero gas fees. Sub-second finality. Human-readable account names.
+XPR Network is a crypto payment method for MPP — like tempo.charge or stripe.charge,
+but with zero gas fees and sub-second finality.
 
 ## Endpoints
 
@@ -61,7 +64,7 @@ Sign this action on XPR Network:
 Chain ID: 384da888112027f0321850a169f737c33e53b388aad48b5adace4bab97f437e0
 RPC: https://api.protonnz.com
 
-### Step 4: Submit credential (two options)
+### Step 4: Submit credential
 
 #### Option A: MPP spec (Authorization header)
 \`\`\`
@@ -105,11 +108,16 @@ GET /api/premium?tx=<transaction_id>
 
 ## Why XPR Network for Machine Payments
 
-- Zero gas fees — micropayments of any size are economical
+MPP supports multiple payment methods: tempo.charge (stablecoins on Tempo),
+stripe.charge (cards/wallets via SPTs), and now XPR Network via mpp-xpr.
+
+XPR Network advantages:
+- Zero gas fees — micropayments of any size are economical (no tx cost eating into $0.001 API calls)
 - Sub-second finality — payment confirms in <0.5s
 - Human-readable accounts — pay "paul" not "0x7a3b..."
 - On-chain agent registry — agents.protonnz.com for identity + trust scores
-- WebAuth wallet — sign with biometrics, no seed phrases
+- WebAuth wallet — sign with biometrics (Face ID, fingerprint), no seed phrases
+- Built-in identity verification (KYC)
 - Hyperion history — instant on-chain verification of any transaction
 
 ## SDK
@@ -127,13 +135,17 @@ const xprServer = createServer({
 
 ### Client (pay with XPR)
 \`\`\`typescript
+import { Mppx } from 'mppx/client'
 import { createClient } from 'mpp-xpr'
+
 const xprClient = createClient({
   signTransaction: async (actions) => {
     const result = await session.transact({ actions })
     return { transactionId: result.transaction_id }
   }
 })
+
+const mppx = Mppx.create({ methods: [xprClient] })
 \`\`\`
 
 ## Replay Protection
@@ -143,7 +155,10 @@ Each transaction hash can only be used once. Resubmitting the same credential re
 ## Links
 
 - MPP Protocol: https://mpp.dev
+- MPP Overview: https://mpp.dev/overview
 - IETF Spec: https://paymentauth.org
+- Stripe MPP Docs: https://docs.stripe.com/payments/machine/mpp
+- mppx SDK: https://www.npmjs.com/package/mppx
 - XPR Network: https://xprnetwork.org
 - WebAuth Wallet: https://webauth.com
 - SDK Source: https://github.com/charliebot87/mpp-xpr
