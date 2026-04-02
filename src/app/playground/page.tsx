@@ -451,7 +451,6 @@ function PlaygroundContent() {
 
           setStreaming(false)
           setStreamCost(null)
-          addLog('info', `Vest "${vestName}" can be stopped to claim refund.`)
         } else {
           const data = await resp.json()
           addLog('success', `← 200 OK — Content unlocked! 🎉`)
