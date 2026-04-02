@@ -30,9 +30,30 @@ function parseWwwAuthenticate(response: Response): any | null {
   const header = response.headers.get('www-authenticate')
   if (!header || !header.startsWith('Payment ')) return null
   try {
-    const b64 = header.slice('Payment '.length)
-    const decoded = atob(b64.replace(/-/g, '+').replace(/_/g, '/'))
-    return JSON.parse(decoded)
+    // Parse RFC-style params: Payment id="...", realm="...", method="...", ...
+    const params: Record<string, string> = {}
+    const paramStr = header.slice('Payment '.length)
+    const regex = /(\w+)="([^"]*)"/g
+    let match
+    while ((match = regex.exec(paramStr)) !== null) {
+      params[match[1]] = match[2]
+    }
+    // Decode the request param (base64 JSON)
+    let request: any = {}
+    if (params.request) {
+      try {
+        const decoded = atob(params.request.replace(/-/g, '+').replace(/_/g, '/'))
+        request = JSON.parse(decoded)
+      } catch {}
+    }
+    return {
+      id: params.id,
+      realm: params.realm,
+      method: params.method,
+      intent: params.intent || 'charge',
+      expires: params.expires,
+      request,
+    }
   } catch {
     return null
   }
