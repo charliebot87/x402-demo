@@ -204,7 +204,7 @@ const response = await client.fetch('https://your-api.com/api/joke', {
   onChallenge: async (challenge) => {
     // Sign with WebAuth or any XPR wallet
     const txId = await wallet.transfer({
-      to: challenge.request.recipient,
+      to: challenge.request.methodDetails?.recipient,
       amount: challenge.request.amount,
     })
     return { txId }
@@ -242,7 +242,7 @@ import { xpr } from 'mppx-xpr-network'
 const mppx = Mppx.create({
   methods: [
     xpr.charge({
-      recipient: 'charliebot',                     // XPR account name
+      methodDetails: { recipient: 'charliebot' },  // XPR account name in methodDetails
       hyperion: 'https://proton.eosusa.io',         // optional: preferred node
       // amount is set per-request (see below)
     }),

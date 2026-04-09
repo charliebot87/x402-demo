@@ -207,14 +207,14 @@ function PlaygroundContent() {
             const req = parsedChallenge.request
             addLog('info', `Max amount: ${req?.maxAmount || '?'}`)
             addLog('info', `Duration: ${req?.duration || '?'}s`)
-            addLog('info', `Vest name: ${req?.vestName || '?'}`)
-            addLog('info', `Recipient: ${req?.recipient || RECIPIENT}`)
+            addLog('info', `Vest name: ${req?.methodDetails?.vestName || '?'}`)
+            addLog('info', `Recipient: ${req?.methodDetails?.recipient || RECIPIENT}`)
             setChallengeAmount(req?.maxAmount?.replace(' XPR', '') || selectedEndpoint.price)
           } else {
             const amount = parsedChallenge.request?.amount || selectedEndpoint.price + ' XPR'
             setChallengeAmount(amount.replace(' XPR', ''))
             addLog('info', `Amount: ${amount}`)
-            addLog('info', `Recipient: ${parsedChallenge.request?.recipient || RECIPIENT}`)
+            addLog('info', `Recipient: ${parsedChallenge.request?.methodDetails?.recipient || RECIPIENT}`)
           }
 
           if (parsedChallenge.expires) {
@@ -335,10 +335,10 @@ function PlaygroundContent() {
 
     const account = walletSession.auth.actor.toString()
     const req = challenge.request
-    const vestName = req.vestName
+    const vestName = req.methodDetails?.vestName ?? req.vestName
     const maxAmount = req.maxAmount
     const duration = req.duration
-    const recipient = req.recipient || RECIPIENT
+    const recipient = req.methodDetails?.recipient || RECIPIENT
 
     addLog('payment', `Opening vest session "${vestName}"...`)
     addLog('info', `Deposit: ${maxAmount} → vest contract`)
