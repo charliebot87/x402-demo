@@ -1,18 +1,9 @@
 import { mppx, enrichChallengeResponse } from '@/lib/payment'
-import { RECIPIENT } from '@/lib/constants'
-
 const AMOUNT = '10.0000 XPR'
 const DURATION = 120 // 2 minutes
 const CHUNKS = 10
 const CHUNK_INTERVAL_MS = 8000 // 8 seconds between chunks
 const COST_PER_CHUNK = 1.0 // 1 XPR per chunk
-
-function generateVestName(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz12345'
-  let name = 'mpp'
-  for (let i = 0; i < 9; i++) name += chars[Math.floor(Math.random() * chars.length)]
-  return name
-}
 
 const PROMPTS = [
   'Give one interesting fact about blockchain technology. One sentence only.',
@@ -50,8 +41,6 @@ export async function GET(request: Request) {
   const result = await mppx.xpr.session({
     maxAmount: AMOUNT,
     duration: DURATION,
-    recipient: RECIPIENT,
-    vestName: generateVestName(),
   })(request)
 
   if (result.status === 402) return enrichChallengeResponse(result.challenge)

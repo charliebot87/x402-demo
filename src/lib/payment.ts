@@ -34,7 +34,7 @@ export async function handlePaidRequest(
   amount: string,
   contentFn: () => Promise<any>,
 ): Promise<Response> {
-  const result = await mppx.xpr.charge({ amount, recipient: RECIPIENT })(request)
+  const result = await mppx.xpr.charge({ amount })(request)
 
   if (result.status === 402) {
     return enrichChallengeResponse(result.challenge)
