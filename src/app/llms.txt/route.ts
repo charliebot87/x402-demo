@@ -40,6 +40,7 @@ Zero gas fees.
 
 ## Free Endpoints
 - GET /api/stats — Playground stats and endpoint list (JSON)
+- GET /openapi.json — OpenAPI 3.1 discovery document with x-payment-info offers for agents and registries
 - GET /llms.txt — This file
 
 ## Payment Details
@@ -78,6 +79,7 @@ Zero gas fees.
 - npm install mppx mppx-xpr-network
 - Server: import { Mppx } from 'mppx/server'; import { xpr } from 'mppx-xpr-network'
 - Docs: https://x402.charliebot.dev/docs
+- Discovery: https://x402.charliebot.dev/openapi.json
 
 ## Related
 - MPP spec: https://mpp.dev
