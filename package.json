@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "validate:discovery": "node scripts/validate-payment-discovery.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
