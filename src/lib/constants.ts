@@ -54,6 +54,30 @@ export const ENDPOINTS = [
     priceLabel: '5 XPR',
     icon: '🐋',
   },
+  {
+    path: '/api/simpledex-launches',
+    name: 'SimpleDEX Launch Feed',
+    description: 'Fresh SimpleDEX token launches in compact machine-readable form for agent monitoring and alerts.',
+    price: '3.0000',
+    priceLabel: '3 XPR',
+    icon: '🧪',
+  },
+  {
+    path: '/api/simpledex-movers',
+    name: 'SimpleDEX Movers Feed',
+    description: 'Top SimpleDEX market movers for agent watchlists, alerts, and market commentary.',
+    price: '3.0000',
+    priceLabel: '3 XPR',
+    icon: '📈',
+  },
+  {
+    path: '/api/xpr-agent-job',
+    name: 'XPR Agent Job Lookup',
+    description: 'On-chain XPR Agents escrow job lookup for agent work verification and proof-of-work receipts.',
+    price: '4.0000',
+    priceLabel: '4 XPR',
+    icon: '🧾',
+  },
 ] as const
 
 export type Endpoint = (typeof ENDPOINTS)[number]
