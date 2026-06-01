@@ -67,10 +67,10 @@ export default function Home() {
               Open Playground →
             </Link>
             <Link
-              href="/docs"
+              href="/services"
               className="px-8 py-3 border border-terminal-border text-gray-400 rounded-lg hover:border-terminal-green/50 hover:text-terminal-green transition-all"
             >
-              Docs
+              Services
             </Link>
             <a
               href="/llms.txt"
@@ -79,6 +79,12 @@ export default function Home() {
               llms.txt
             </a>
           </div>
+        </div>
+
+        <div className="flex items-center justify-center -mt-10 mb-12">
+          <Link href="/docs" className="text-sm text-gray-500 hover:text-terminal-cyan transition-all">
+            Read the docs →
+          </Link>
         </div>
 
         {/* Live counter */}
