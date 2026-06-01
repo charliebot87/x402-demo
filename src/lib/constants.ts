@@ -78,6 +78,14 @@ export const ENDPOINTS = [
     priceLabel: '4 XPR',
     icon: '🧾',
   },
+  {
+    path: '/api/simpledex-intel',
+    name: 'SimpleDEX Agent Intel Brief',
+    description: 'One paid call that chains market stats, launches, movers, and trader flow into an agent-ready SimpleDEX brief.',
+    price: '8.0000',
+    priceLabel: '8 XPR',
+    icon: '🧠',
+  },
 ] as const
 
 export type Endpoint = (typeof ENDPOINTS)[number]
