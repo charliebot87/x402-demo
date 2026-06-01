@@ -122,8 +122,28 @@ export default function ServicesPage() {
       </section>
 
       <section className="sticky top-0 z-20 border-y border-white/10 bg-[#080b13]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid grid-cols-[1fr_auto] gap-2 lg:hidden">
+            <label className="block">
+              <span className="sr-only">Filter services</span>
+              <select
+                value={activeFilter}
+                onChange={(event) => setActiveFilter(event.target.value as MarketplaceFilter)}
+                className="h-11 w-full rounded-xl border border-white/10 bg-black/40 px-3 text-sm font-bold text-white outline-none focus:border-terminal-green/60"
+              >
+                {marketplaceFilters.map((filter) => (
+                  <option key={filter} value={filter} className="bg-[#080b13] text-white">
+                    {filter}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex h-11 items-center rounded-xl border border-terminal-green/20 bg-terminal-green/10 px-3 text-xs font-bold text-terminal-green">
+              {filteredServices.length}/{marketplaceServices.length}
+            </div>
+          </div>
+
+          <div className="hidden flex-wrap items-center gap-3 lg:flex">
             {marketplaceFilters.map((filter) => (
               <button
                 key={filter}
@@ -143,8 +163,8 @@ export default function ServicesPage() {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search services, tags, proof..."
-              className="w-full rounded-full border border-white/10 bg-black/30 px-5 py-3 text-sm text-white outline-none placeholder:text-gray-600 focus:border-terminal-green/60"
+              placeholder="Search services..."
+              className="h-11 w-full rounded-xl border border-white/10 bg-black/30 px-4 text-sm text-white outline-none placeholder:text-gray-600 focus:border-terminal-green/60 lg:rounded-full"
             />
           </label>
         </div>
