@@ -2,73 +2,18 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ENDPOINTS, SESSION_ENDPOINTS } from '@/lib/constants'
-
-type Filter = 'All' | '1P' | '3P' | 'Market Data' | 'Agent Proof' | 'AI Utility' | 'Workflow'
-
-function classify(service: (typeof ENDPOINTS)[number] | (typeof SESSION_ENDPOINTS)[number]) {
-  const path = service.path
-  const isComposed = path.includes('simpledex-intel')
-  const isSimpleDex = path.includes('simpledex')
-  const isAgentProof = path.includes('agent-job')
-  const isMarket = path.includes('whale') || path.includes('market') || isSimpleDex
-  const isSession = path.includes('stream')
-  const isAiUtility = path.includes('joke') || path.includes('fortune')
-
-  return {
-    provider: '1P',
-    providerLabel: 'Direct from Charlie',
-    category: isComposed
-      ? 'Workflow'
-      : isAgentProof
-        ? 'Agent Proof'
-        : isMarket
-          ? 'Market Data'
-          : isSession
-            ? 'Session'
-            : 'AI Utility',
-    paymentType: isSession ? 'session' : 'one-time',
-    source: isAgentProof
-      ? 'on-chain'
-      : isSimpleDex || path.includes('market') || path.includes('whale')
-        ? 'live data'
-        : isAiUtility
-          ? 'ai-generated'
-          : 'composed',
-    proof: isComposed
-      ? ['openapi', 'payment challenge', 'composed service']
-      : isAgentProof
-        ? ['openapi', 'payment challenge', 'on-chain source']
-        : ['openapi', 'payment challenge', 'last verified'],
-    tags: isComposed
-      ? ['composed', 'simpledex', 'workflow']
-      : isSimpleDex
-        ? ['simpledex', 'market-data', 'agents']
-        : isAgentProof
-          ? ['escrow', 'receipts', 'agents']
-          : isSession
-            ? ['streaming', 'refundable', 'xpr']
-            : ['paid-api', 'xpr', 'http-402'],
-  } as const
-}
-
-const services = [
-  ...SESSION_ENDPOINTS.map((service) => ({ ...service, ...classify(service) })),
-  ...ENDPOINTS.map((service) => ({ ...service, ...classify(service) })),
-]
-
-const filters: Filter[] = ['All', '1P', '3P', 'Market Data', 'Agent Proof', 'AI Utility', 'Workflow']
+import { marketplaceFilters, marketplaceProviders, marketplaceServices, type MarketplaceFilter } from '@/lib/services'
 
 export default function ServicesPage() {
-  const [activeFilter, setActiveFilter] = useState<Filter>('All')
+  const [activeFilter, setActiveFilter] = useState<MarketplaceFilter>('All')
   const [query, setQuery] = useState('')
 
-  const marketDataCount = services.filter((service) => service.category === 'Market Data').length
-  const composedCount = services.filter((service) => service.category === 'Workflow').length
+  const marketDataCount = marketplaceServices.filter((service) => service.category === 'Market Data').length
+  const composedCount = marketplaceServices.filter((service) => service.category === 'Workflow').length
 
   const filteredServices = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return services.filter((service) => {
+    return marketplaceServices.filter((service) => {
       const matchesFilter =
         activeFilter === 'All' ||
         service.provider === activeFilter ||
@@ -80,6 +25,7 @@ export default function ServicesPage() {
         service.path,
         service.category,
         service.source,
+        service.status,
         ...service.tags,
         ...service.proof,
       ]
@@ -100,6 +46,7 @@ export default function ServicesPage() {
           <div className="flex flex-wrap items-center gap-4">
             <Link href="/docs" className="hover:text-white">Docs</Link>
             <a href="/.well-known/agent-services.json" className="hover:text-white">Discovery JSON</a>
+            <Link href="/submit" className="hover:text-white">Submit service</Link>
             <Link href="/playground" className="rounded-full bg-terminal-green px-4 py-2 font-bold text-black hover:bg-terminal-green/90">
               Try payments
             </Link>
@@ -122,7 +69,7 @@ export default function ServicesPage() {
           <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/40">
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="rounded-2xl bg-black/30 p-4">
-                <div className="text-3xl font-black text-terminal-green">{services.length}</div>
+                <div className="text-3xl font-black text-terminal-green">{marketplaceServices.length}</div>
                 <div className="mt-1 text-xs text-gray-500">paid services</div>
               </div>
               <div className="rounded-2xl bg-black/30 p-4">
@@ -141,10 +88,43 @@ export default function ServicesPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-6 pb-8">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <div className="text-sm font-bold uppercase tracking-[0.2em] text-terminal-green">Providers</div>
+            <h2 className="mt-2 text-2xl font-black">Verified storefronts</h2>
+          </div>
+          <Link href="/submit" className="rounded-full border border-white/10 px-5 py-2 text-sm font-bold text-white hover:border-terminal-green/50">
+            Submit yours →
+          </Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {marketplaceProviders.map((provider) => (
+            <article key={provider.id} className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-xl font-black">{provider.name}</div>
+                  <div className="text-sm text-gray-500">@{provider.handle} · {provider.type}</div>
+                </div>
+                <span className="rounded-full border border-terminal-green/20 bg-terminal-green/10 px-3 py-1 text-xs font-bold text-terminal-green">
+                  trust {provider.trustScore}
+                </span>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-gray-400">{provider.description}</p>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs text-gray-300">
+                <span className="rounded-full bg-black/30 px-3 py-1">{provider.serviceCount} services</span>
+                <span className="rounded-full bg-black/30 px-3 py-1">verified provider</span>
+                <a href={provider.links.discovery} className="rounded-full bg-black/30 px-3 py-1 hover:text-terminal-green">discovery</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="sticky top-0 z-20 border-y border-white/10 bg-[#080b13]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-3">
-            {filters.map((filter) => (
+            {marketplaceFilters.map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
@@ -171,7 +151,7 @@ export default function ServicesPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pt-8 text-sm text-gray-500">
-        Showing <span className="font-bold text-white">{filteredServices.length}</span> of {services.length} services.
+        Showing <span className="font-bold text-white">{filteredServices.length}</span> of {marketplaceServices.length} services.
         {activeFilter !== 'All' ? <span> Filter: <span className="text-terminal-green">{activeFilter}</span>.</span> : null}
       </section>
 
@@ -190,7 +170,7 @@ export default function ServicesPage() {
                   {service.provider}
                 </span>
                 <span className="rounded-full border border-terminal-green/20 bg-terminal-green/10 px-3 py-1 text-xs font-bold text-terminal-green">
-                  verified
+                  {service.status}
                 </span>
               </div>
             </div>
@@ -239,12 +219,18 @@ export default function ServicesPage() {
               </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="mt-5 grid grid-cols-3 gap-3">
               <Link
                 href={`/playground?endpoint=${encodeURIComponent(service.path)}`}
                 className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-black transition group-hover:bg-terminal-green"
               >
-                Try →
+                Try
+              </Link>
+              <Link
+                href={`/services/${service.slug}`}
+                className="inline-flex items-center justify-center rounded-xl border border-white/10 px-4 py-3 text-sm font-bold text-white hover:border-terminal-green/50"
+              >
+                Details
               </Link>
               <a
                 href="/openapi.json"
@@ -266,7 +252,10 @@ export default function ServicesPage() {
               Add a discovery file, price your endpoint in XPR, and agents can buy calls without a signup flow or checkout page. The registry turns hidden APIs into revenue lines.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a href="/.well-known/agent-services.json" className="rounded-full bg-terminal-green px-6 py-3 font-black text-black hover:bg-terminal-green/90">
+              <Link href="/submit" className="rounded-full bg-terminal-green px-6 py-3 font-black text-black hover:bg-terminal-green/90">
+                Submit your service
+              </Link>
+              <a href="/.well-known/agent-services.json" className="rounded-full border border-white/15 px-6 py-3 font-bold text-white hover:border-white/30">
                 View discovery file
               </a>
               <a href="/openapi.json" className="rounded-full border border-white/15 px-6 py-3 font-bold text-white hover:border-white/30">
